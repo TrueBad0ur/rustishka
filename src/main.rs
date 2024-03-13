@@ -2,7 +2,7 @@ use std::{io, thread, time};
 use std::io::{stdout, Write, Read};
 
 extern crate rusqlite;
-use rusqlite::{Connection, Result};
+use rusqlite::{Connection, params, Result};
 use sha2::{Sha512, Digest};
 
 struct User {
@@ -12,32 +12,26 @@ struct User {
     money: u64,
 }
 
-fn add_money(conn: &Connection, global_username: &mut String) -> Result<()> {
-    let starting = "UPDATE users SET money = money + 5 WHERE username='";
-    let ending = ";";
-    let mut query = [starting, global_username.as_str()].join("");
-    query = [query, ending.to_string()].join("'");
+fn add_money(conn: &Connection, global_username: &String) -> Result<()> {
+    //let amount:u64 = get_user_input().parse::<i32>().unwrap();
+    let query = "UPDATE users SET money = money + ?1 WHERE username = ?2";
 
     conn.execute(
-        query.as_str(),
-        [],
+        query, params![5, &global_username],
     )?;
 
     Ok(())
 }
 
-fn get_profile(conn: &Connection, global_username: &mut String) -> Result<()> {
+fn get_profile(conn: &Connection, global_username: &String) -> Result<()> {
 
-    let starting = "SELECT id, username, password, money from users WHERE username='";
-    let ending = ";";
-    let mut query = [starting, global_username.as_str()].join("");
-    query = [query, ending.to_string()].join("'");
+    let query = "SELECT id, username, password, money from users WHERE username = ?1";
 
     let mut stmt = conn.prepare(
-        query.as_str(),
+        query,
     )?;
 
-    let users = stmt.query_map([], |row| {
+    let users = stmt.query_map(params![&global_username.as_str()], |row| {
         Ok(User {
             id: row.get(0)?,
             username: row.get(1)?,
@@ -129,20 +123,16 @@ fn login_user(conn: &Connection, logged: &mut bool, global_username: &mut String
     print!("Enter your password: ");
     let password = encode_password(get_user_input());
 
-    let starting = "SELECT password from users WHERE username='";
-    let ending = ";";
-    let mut query = [starting, username.as_str()].join("");
-    query = [query, ending.to_string()].join("'");
-    //println!("{}", query);
+    let query = "SELECT password from users WHERE username = ?1";
 
     let mut stmt = conn.prepare(
-        query.as_str(),
+        query,
     )?;
 
     struct Data {
         password: String,
     }
-    let data = stmt.query_map([], |row| {
+    let data = stmt.query_map(params![&username], |row| {
         Ok(Data {
             password: row.get(0)?,
         })
@@ -220,8 +210,8 @@ fn main() -> Result<()> {
             print!("\n1 - my profile\n2 - get money\n3 - logout\n0 - exit\n\n>");
             let letter = get_user_input().chars().nth(0).unwrap();
             match letter {
-                '1' => get_profile(&conn, &mut global_username).expect("Getting profile failed!"),
-                '2' => add_money(&conn, &mut global_username).expect("Getting money failed!"),
+                '1' => get_profile(&conn, &global_username).expect("Getting profile failed!"),
+                '2' => add_money(&conn, &global_username).expect("Getting money failed!"),
                 '3' => logout_user(&mut logged_in).expect("User logout failed!"),
                 '0' => break,
                 _ => println!("wrong!")
