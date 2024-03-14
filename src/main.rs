@@ -12,6 +12,10 @@ struct User {
     money: u64,
 }
 
+fn clear_console() {
+    print!("\x1B[2J\x1B[1;1H");
+}
+
 fn add_money(conn: &Connection, global_username: &String) -> Result<()> {
     //let amount:u64 = get_user_input().parse::<i32>().unwrap();
     let query = "UPDATE users SET money = money + ?1 WHERE username = ?2";
@@ -51,6 +55,8 @@ fn get_profile(conn: &Connection, global_username: &String) -> Result<()> {
 fn logo() {
     print!("--- rustishka ---")
 }
+
+#[allow(dead_code)]
 fn pause_v2() {
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
@@ -100,6 +106,7 @@ fn get_data_from_db(conn: &Connection) -> Result<()> {
         println!("Id: {} Username: {} Password: {} Money: {}", item.id, item.username, item.password, item.money);
     }
     pause(3);
+    clear_console();
     Ok(())
 }
 
@@ -109,12 +116,33 @@ fn register_user(conn: &Connection) -> Result<()> {
     print!("Enter your password: ");
     let password = encode_password(get_user_input());
 
-    conn.execute(
-       "INSERT INTO users (username, password, money) values (?1, ?2, ?3)",
-       &[&username.to_string(), &password.to_string(), &0.to_string()],
+    let query = "SELECT id, username, password, money from users WHERE username = ?1";
+    let mut stmt = conn.prepare(
+        query,
     )?;
 
-   Ok(())
+    let user = stmt.query_map(params![&username], |row| {
+        Ok(User {
+            id: row.get(0)?,
+            username: row.get(1)?,
+            password: row.get(2)?,
+            money: row.get(3)?,
+        })
+    })?;
+
+    let number_of_rows = user.count();
+    if number_of_rows == 0 {
+        conn.execute(
+            "INSERT INTO users (username, password, money) values (?1, ?2, ?3)",
+            &[&username.to_string(), &password.to_string(), &0.to_string()],
+        ).expect("Unexpected sql error!");
+    } else {
+        println!("Such user already registered!\nTry another one!");
+        pause(2);
+    }
+
+    clear_console();
+    Ok(())
 }
 
 fn login_user(conn: &Connection, logged: &mut bool, global_username: &mut String) -> Result<()> {
@@ -123,30 +151,40 @@ fn login_user(conn: &Connection, logged: &mut bool, global_username: &mut String
     print!("Enter your password: ");
     let password = encode_password(get_user_input());
 
-    let query = "SELECT password from users WHERE username = ?1";
+    let query = "SELECT id, username, password, money from users WHERE username = ?1";
 
     let mut stmt = conn.prepare(
         query,
     )?;
 
-    struct Data {
-        password: String,
-    }
-    let data = stmt.query_map(params![&username], |row| {
-        Ok(Data {
-            password: row.get(0)?,
+    let user = stmt.query_map(params![&username], |row| {
+        Ok(User {
+            id: row.get(0)?,
+            username: row.get(1)?,
+            password: row.get(2)?,
+            money: row.get(3)?,
         })
     })?;
 
-    for value in data {
-        let to_compare = value.unwrap().password;
-        if password == to_compare {
-            *global_username = username.clone();
-            *logged = true;
-        } else {
-            println!("Wring username or password!");
+    //let number_of_rows = user.count();
+    //if number_of_rows != 0 {
+        for line in user {
+            let to_compare = line.unwrap().password;
+            if password == to_compare {
+                *global_username = username.clone();
+                *logged = true;
+                clear_console();
+                println!("User {} successfully authorized!", global_username);
+            } else {
+                println!("Wrong username or password!");
+            }
         }
-    }
+    //} else {
+        println!("Username or password is wrong");
+        pause(2);
+    //}
+
+    clear_console();
     Ok(())
 }
 
@@ -181,11 +219,11 @@ fn get_user_input() -> String {
 fn logout_user(logged: &mut bool) -> Result<()> {
     *logged = false;
 
-    pause(2);
     Ok(())
 }
 
 fn main() -> Result<()> {
+    clear_console();
     let mut logged_in = false;
     let mut global_username: String = "".to_string();
     let conn = Connection::open("users.db")?;
@@ -193,7 +231,6 @@ fn main() -> Result<()> {
 
     loop {
         if !logged_in {
-            print!("\x1B[2J\x1B[1;1H");
             logo();
             print!("\n1 - register\n2 - login\n3 - list all data from db\n0 - exit\n\n>");
             let letter = get_user_input().chars().nth(0).unwrap();
@@ -205,8 +242,8 @@ fn main() -> Result<()> {
                 _ => println!("wrong!")
             }
         } else if logged_in {
-            print!("\x1B[2J\x1B[1;1H");
             logo();
+            println!("\nProfile: {}", global_username);
             print!("\n1 - my profile\n2 - get money\n3 - logout\n0 - exit\n\n>");
             let letter = get_user_input().chars().nth(0).unwrap();
             match letter {
@@ -222,6 +259,6 @@ fn main() -> Result<()> {
     //register_user(&conn).expect("User adding failed!");
     //get_data_from_db(&conn).expect("Select data failed!");
 
-    let err=conn.close();
+    let _err=conn.close();
     Ok(())
 }
