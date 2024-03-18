@@ -27,10 +27,8 @@ fn main() {
     }
 
     let bounds = parse_pair(&args[2], 'x').expect("ошибка при разборе размеров изображения");
-    let upper_left =
-        parse_complex(&args[3]).expect("ошибка при разборе координат левого верхнего угла");
-    let lower_right =
-        parse_complex(&args[4]).expect("ошибка при разборе координат правого нижнего угла");
+    let upper_left = parse_complex(&args[3]).expect("ошибка при разборе координат левого верхнего угла");
+    let lower_right = parse_complex(&args[4]).expect("ошибка при разборе координат правого нижнего угла");
     let mut pixels = vec![0; bounds.0 * bounds.1];
 
     let threads = 16;
@@ -119,7 +117,7 @@ fn render(
     for row in 0..bounds.1 {
         for column in 0..bounds.0 {
             let point = pixel_to_point(bounds, (column, row), upper_left, lower_right);
-            pixels[row * bounds.0 + column] = match escape_time(point, 255) {
+            pixels[row * bounds.0 + column] = match escape_time(point, 1000) {
                 None => 0,
                 Some(count) => 255 - count as u8,
             };
