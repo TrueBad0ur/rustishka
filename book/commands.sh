@@ -1,6 +1,6 @@
 cargo build --release
 cargo run
-cargo clean
+#cargo clean
 
 
 

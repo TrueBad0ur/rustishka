@@ -1,4 +1,6 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {
+  config.allowUnfree = true;
+} }:
   pkgs.mkShell {
-    nativeBuildInputs = with pkgs.buildPackages; [ rustup ];
+    nativeBuildInputs = with pkgs.buildPackages; [ rustup jetbrains ];
 }
