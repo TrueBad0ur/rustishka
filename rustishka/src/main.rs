@@ -145,6 +145,20 @@ fn register_user(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
+fn register_admin(conn: &Connection) -> Result<()> {
+    let username = String::from("admin");
+    let password = encode_password(String::from("admin"));
+
+    conn.execute(
+        "INSERT OR IGNORE INTO users (username, password, money) values (?1, ?2, ?3)",
+        &[&username.to_string(), &password.to_string(), &0.to_string()],
+    ).expect("Unexpected sql error!");
+
+
+    clear_console();
+    Ok(())
+}
+
 fn login_user(conn: &Connection, logged: &mut bool, global_username: &mut String) -> Result<()> {
     print!("Enter your username: ");
     let username = get_user_input();
@@ -166,23 +180,21 @@ fn login_user(conn: &Connection, logged: &mut bool, global_username: &mut String
         })
     })?;
 
-    //let number_of_rows = user.count();
-    //if number_of_rows != 0 {
-        for line in user {
-            let to_compare = line.unwrap().password;
-            if password == to_compare {
-                *global_username = username.clone();
-                *logged = true;
-                clear_console();
-                println!("User {} successfully authorized!", global_username);
-            } else {
-                println!("Wrong username or password!");
-            }
+    for line in user {
+        let to_compare = line.unwrap().password;
+        if password == to_compare {
+            *global_username = username.clone();
+            *logged = true;
+            clear_console();
+            println!("User {} successfully authorized!", global_username);
+            pause(2);
+
+            clear_console();
+            return Ok(())
         }
-    //} else {
-        println!("Username or password is wrong");
-        pause(2);
-    //}
+    }
+    println!("Wrong username or password!");
+    pause(2);
 
     clear_console();
     Ok(())
@@ -228,16 +240,29 @@ fn main() -> Result<()> {
     let mut global_username: String = "".to_string();
     let conn = Connection::open("users.db")?;
     setup_db(&conn).expect("Setup DB failed!");
+    register_admin(&conn).expect("User admin registering failed!");
 
     loop {
         if !logged_in {
             logo();
-            print!("\n1 - register\n2 - login\n3 - list all data from db\n0 - exit\n\n>");
+            print!("\n1 - register\n2 - login\n0 - exit\n\n>");
             let letter = get_user_input().chars().nth(0).unwrap();
             match letter {
                 '1' => register_user(&conn).expect("User registering failed!"),
                 '2' => login_user(&conn, &mut logged_in, &mut global_username).expect("User login failed!"),
-                '3' => get_data_from_db(&conn).expect("Data selecting failed!"),
+                '0' => break,
+                _ => println!("wrong!")
+            }
+        } else if &global_username == "admin" && logged_in {
+            logo();
+            println!("\nProfile: {}", global_username);
+            print!("\n1 - my profile\n2 - get money\n3 - logout\n4 - get users data from db\n0 - exit\n\n>");
+            let letter = get_user_input().chars().nth(0).unwrap();
+            match letter {
+                '1' => get_profile(&conn, &global_username).expect("Getting profile failed!"),
+                '2' => add_money(&conn, &global_username).expect("Getting money failed!"),
+                '3' => logout_user(&mut logged_in).expect("User logout failed!"),
+                '4' => get_data_from_db(&conn).expect("Data selecting failed!"),
                 '0' => break,
                 _ => println!("wrong!")
             }
