@@ -10,6 +10,7 @@ mod mod9;
 mod mod10;
 mod mod11;
 mod mod12;
+mod mod13;
 
 use mod2::count_positives_sum_negatives;
 use mod3::find_average;
@@ -24,6 +25,7 @@ use mod9::points;
 use mod10::square_digits;
 use mod11::positive_sum;
 use mod12::get_count;
+use mod13::validate_pin;
 
 fn mod3_test() {
     let input = [
@@ -123,8 +125,30 @@ fn mod12_test() {
     assert_eq!(get_count("abracadabra"), 5);
 }
 
+fn mod13_test() {
+    assert_eq!(validate_pin("1"), false);
+    assert_eq!(validate_pin("12"), false);
+    assert_eq!(validate_pin("123"), false);
+    assert_eq!(validate_pin("12345"), false);
+    assert_eq!(validate_pin("1234567"), false);
+    assert_eq!(validate_pin("-1234"), false);
+    assert_eq!(validate_pin("1.234"), false);
+    assert_eq!(validate_pin("-1.234"), false);
+    assert_eq!(validate_pin("00000000"), false);
+    assert_eq!(validate_pin("a234"), false);
+    assert_eq!(validate_pin(".234"), false);
+    assert_eq!(validate_pin("1234"), true);
+    assert_eq!(validate_pin("0000"), true);
+    assert_eq!(validate_pin("1111"), true);
+    assert_eq!(validate_pin("123456"), true);
+    assert_eq!(validate_pin("098765"), true);
+    assert_eq!(validate_pin("000000"), true);
+    assert_eq!(validate_pin("123456"), true);
+    assert_eq!(validate_pin("090909"), true);
+}
+
 fn main() {
     // assert_eq!(mod1::count_sheep(&[false, true, true]), 2);
     // dotest(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], &[10, -65]);
-    mod12_test();
+    mod13_test();
 }
