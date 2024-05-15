@@ -4,6 +4,8 @@ mod mod3;
 mod mod4;
 mod mod5;
 mod mod6;
+mod mod7;
+mod mod8;
 
 use mod2::count_positives_sum_negatives;
 use mod3::find_average;
@@ -12,6 +14,8 @@ use mod4::abbrev_name;
 use mod5::rps;
 use either::Either;
 use mod6::sum_mix;
+use mod7::litres;
+use mod8::are_you_playing_banjo;
 
 fn mod3_test() {
     let input = [
@@ -65,11 +69,30 @@ fn mod6_test() {
     mod6_dotest(&[Either::Left(8), Either::Left(0), Either::Left(0), Either::Left(8), Either::Left(5), Either::Left(7), Either::Left(2), Either::Left(3), Either::Left(7), Either::Left(8), Either::Left(6), Either::Left(7)], 61);
 }
 
+fn mod7_test() {
+    assert_eq!(litres(2.), 1);
+    assert_eq!(litres(1.4), 0);
+    assert_eq!(litres(12.3), 6);
+    assert_eq!(litres(0.82), 0);
+    assert_eq!(litres(11.8), 5);
+    assert_eq!(litres(1787.), 893);
+    assert_eq!(litres(0.), 0);
+}
+
+fn mod8_test() {
+    assert_eq!(are_you_playing_banjo("Martin"), "Martin does not play banjo");
+    assert_eq!(are_you_playing_banjo("Rikke"), "Rikke plays banjo");
+    assert_eq!(are_you_playing_banjo("bravo"), "bravo does not play banjo");
+    assert_eq!(are_you_playing_banjo("rolf"), "rolf plays banjo");
+}
+
 fn main() {
     // assert_eq!(mod1::count_sheep(&[false, true, true]), 2);
     // dotest(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], &[10, -65]);
     // mod3_test();
     // mod4_test();
     // mod5_test();
-    mod6_test();
+    // mod6_test();
+    // mod7_test();
+    mod8_test();
 }
