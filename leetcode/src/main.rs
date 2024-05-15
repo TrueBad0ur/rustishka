@@ -6,6 +6,8 @@ mod mod5;
 mod mod6;
 mod mod7;
 mod mod8;
+mod mod9;
+mod mod10;
 
 use mod2::count_positives_sum_negatives;
 use mod3::find_average;
@@ -16,6 +18,8 @@ use either::Either;
 use mod6::sum_mix;
 use mod7::litres;
 use mod8::are_you_playing_banjo;
+use mod9::points;
+use mod10::square_digits;
 
 fn mod3_test() {
     let input = [
@@ -86,6 +90,25 @@ fn mod8_test() {
     assert_eq!(are_you_playing_banjo("rolf"), "rolf plays banjo");
 }
 
+const ERR_MSG1: &str = "\nYour result (left) did not match the expected output (right)";
+    
+fn do_fixed_test(e: &[&str], expected: u32) {
+    let a = &e.iter().map(|x| x.to_string()).collect::<Vec<_>>();
+    assert_eq!(points(a), expected, "{ERR_MSG1} with games = {a:?}")
+}
+
+fn mod9_test() {
+    do_fixed_test(&["1:0", "2:0", "3:0", "4:0", "2:1", "3:1", "4:1", "3:2", "4:2", "4:3"], 30);
+    do_fixed_test(&["1:1", "2:2", "3:3", "4:4", "2:2", "3:3", "4:4", "3:3", "4:4", "4:4"], 10);
+    do_fixed_test(&["0:1", "0:2", "0:3", "0:4", "1:2", "1:3", "1:4", "2:3", "2:4", "3:4"], 0);
+    do_fixed_test(&["1:0", "2:0", "3:0", "4:0", "2:1", "1:3", "1:4", "2:3", "2:4", "3:4"], 15);
+    do_fixed_test(&["1:0", "2:0", "3:0", "4:4", "2:2", "3:3", "1:4", "2:3", "2:4", "3:4"], 12);
+}
+
+fn mod10_test() {
+    assert_eq!(square_digits(9119), 811181, "\nFailed with num 9119");
+}
+
 fn main() {
     // assert_eq!(mod1::count_sheep(&[false, true, true]), 2);
     // dotest(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], &[10, -65]);
@@ -94,5 +117,7 @@ fn main() {
     // mod5_test();
     // mod6_test();
     // mod7_test();
-    mod8_test();
+    // mod8_test();
+    // mod9_test();
+    mod10_test();
 }
