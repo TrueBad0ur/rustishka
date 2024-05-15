@@ -8,6 +8,8 @@ mod mod7;
 mod mod8;
 mod mod9;
 mod mod10;
+mod mod11;
+mod mod12;
 
 use mod2::count_positives_sum_negatives;
 use mod3::find_average;
@@ -20,6 +22,8 @@ use mod7::litres;
 use mod8::are_you_playing_banjo;
 use mod9::points;
 use mod10::square_digits;
+use mod11::positive_sum;
+use mod12::get_count;
 
 fn mod3_test() {
     let input = [
@@ -109,15 +113,18 @@ fn mod10_test() {
     assert_eq!(square_digits(9119), 811181, "\nFailed with num 9119");
 }
 
+fn mod11_test() {
+    // assert_eq!(positive_sum(&[1,2,3,4,5]), 15);
+    assert_eq!(positive_sum(&[1,-2,3,4,5]), 13);
+    assert_eq!(positive_sum(&[-1,2,3,4,-5]), 9);
+}
+
+fn mod12_test() {
+    assert_eq!(get_count("abracadabra"), 5);
+}
+
 fn main() {
     // assert_eq!(mod1::count_sheep(&[false, true, true]), 2);
     // dotest(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], &[10, -65]);
-    // mod3_test();
-    // mod4_test();
-    // mod5_test();
-    // mod6_test();
-    // mod7_test();
-    // mod8_test();
-    // mod9_test();
-    mod10_test();
+    mod12_test();
 }
