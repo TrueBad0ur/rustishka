@@ -11,6 +11,8 @@ mod mod10;
 mod mod11;
 mod mod12;
 mod mod13;
+mod mod14;
+mod mod15;
 
 use mod2::count_positives_sum_negatives;
 use mod3::find_average;
@@ -26,6 +28,8 @@ use mod10::square_digits;
 use mod11::positive_sum;
 use mod12::get_count;
 use mod13::validate_pin;
+use mod14::persistence;
+use mod15::spin_words;
 
 fn mod3_test() {
     let input = [
@@ -147,8 +151,25 @@ fn mod13_test() {
     assert_eq!(validate_pin("090909"), true);
 }
 
+fn mod14_test() {
+    assert_eq!(persistence(39), 3);
+    assert_eq!(persistence(4), 0);
+    assert_eq!(persistence(25), 2);
+    assert_eq!(persistence(999), 4);
+}
+
+fn mod15_test() {
+    assert_eq!(spin_words("Welcome"), "emocleW");
+    assert_eq!(spin_words("Hey fellow warriors"), "Hey wollef sroirraw");
+    assert_eq!(spin_words("This is a test"), "This is a test");
+    assert_eq!(spin_words("This is another test"), "This is rehtona test");
+    assert_eq!(spin_words("You are almost to the last test"), "You are tsomla to the last test");
+    assert_eq!(spin_words("Just kidding there is still one more"), "Just gniddik ereht is llits one more");
+    assert_eq!(spin_words("Seriously this is the last one"), "ylsuoireS this is the last one");
+}
+
 fn main() {
     // assert_eq!(mod1::count_sheep(&[false, true, true]), 2);
     // dotest(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], &[10, -65]);
-    mod13_test();
+    mod15_test();
 }
