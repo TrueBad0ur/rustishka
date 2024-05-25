@@ -13,6 +13,7 @@ mod mod12;
 mod mod13;
 mod mod14;
 mod mod15;
+mod mod16;
 
 use mod2::count_positives_sum_negatives;
 use mod3::find_average;
@@ -30,6 +31,7 @@ use mod12::get_count;
 use mod13::validate_pin;
 use mod14::persistence;
 use mod15::spin_words;
+use mod16::parse;
 
 fn mod3_test() {
     let input = [
@@ -168,8 +170,13 @@ fn mod15_test() {
     assert_eq!(spin_words("Seriously this is the last one"), "ylsuoireS this is the last one");
 }
 
+fn mod16_test() {
+    assert_eq!(parse("iiisdoso"), vec![8, 64]);
+    assert_eq!(parse("iiisdosodddddiso"), vec![8, 64, 3600]);
+}
+
 fn main() {
     // assert_eq!(mod1::count_sheep(&[false, true, true]), 2);
     // dotest(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15], &[10, -65]);
-    mod15_test();
+    mod16_test();
 }
