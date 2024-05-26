@@ -12,6 +12,12 @@ struct User {
     money: u64,
 }
 
+struct Item {
+    id: u64,
+    product: String,
+    price: u32,
+}
+
 fn clear_console() {
     print!("\x1B[2J\x1B[1;1H");
 }
@@ -24,6 +30,9 @@ fn add_money(conn: &Connection, global_username: &String) -> Result<()> {
         query, params![5, &global_username],
     )?;
 
+    println!("5 points added to your account!");
+    pause(3);
+    clear_console();
     Ok(())
 }
 
@@ -43,12 +52,13 @@ fn get_profile(conn: &Connection, global_username: &String) -> Result<()> {
             money: row.get(3)?,
         })
     })?;
-
+    clear_console();
     for user in users {
         let item = user.unwrap();
         println!("Username: {}\nMoney: {}\n", item.username, item.money);
     }
     pause(3);
+    clear_console();
     Ok(())
 }
 
@@ -211,6 +221,29 @@ fn setup_db(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    conn.execute(
+        "create table if not exists shop (
+             id integer primary key,
+             product text not null unique,
+             price integer
+         )",
+        [],
+    )?;
+
+    let items = [
+        ("item1", 100),
+        ("item2", 200),
+        ("item3", 300),
+    ];
+
+    for (item, price) in items {
+        conn.execute(
+            "INSERT OR IGNORE INTO shop (product, price) values (?1, ?2)",
+            &[&item.to_string(), &price.to_string()],
+        ).expect("Unexpected sql error!");
+    }
+
+    clear_console();
     Ok(())
 }
 
@@ -230,6 +263,54 @@ fn get_user_input() -> String {
 
 fn logout_user(logged: &mut bool) -> Result<()> {
     *logged = false;
+    clear_console();
+    Ok(())
+}
+
+fn buy(conn: &Connection) -> Result<()> {
+    loop {
+        shop(conn).expect("Printing shop failed!");
+        println!("Enter 0 if you wanna exit shop");
+        print!("Enter ID of the item you wanna buy> ");
+        let id = get_user_input().chars().nth(0).unwrap();
+        match id {
+            '0' => break,
+            _ => ()
+        }
+        print!("Enter the amount of item you wanna buy> ");
+        let amount = get_user_input().chars().nth(0).unwrap();
+    }
+
+    todo!();
+
+    Ok(())
+}
+
+fn shop(conn: &Connection) -> Result<()> {
+    clear_console();
+    let mut stmt = conn.prepare(
+        "SELECT id, product, price from shop;",
+    )?;
+
+    let items = stmt.query_map([], |row| {
+        Ok(Item {
+            id: row.get(0)?,
+            product: row.get(1)?,
+            price: row.get(2)?,
+        })
+    })?;
+
+    print!("
+┏━━━━┳━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
+┃id  ┃product              ┃price    ┃
+┣━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━┫");
+    for item in items {
+        let item_unwr = item.unwrap();
+        print!("
+┃{}   ┃{}                ┃{}      ┃\n┣━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━┫", item_unwr.id, item_unwr.product, item_unwr.price);
+    }
+    print!("
+┗━━━━┻━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━┛");
 
     Ok(())
 }
@@ -256,25 +337,27 @@ fn main() -> Result<()> {
         } else if &global_username == "admin" && logged_in {
             logo();
             println!("\nProfile: {}", global_username);
-            print!("\n1 - my profile\n2 - get money\n3 - logout\n4 - get users data from db\n0 - exit\n\n>");
+            print!("\n1 - my profile\n2 - get money\n3 - logout\n4 - get users data from db\n5 - shop\n0 - exit\n\n>");
             let letter = get_user_input().chars().nth(0).unwrap();
             match letter {
                 '1' => get_profile(&conn, &global_username).expect("Getting profile failed!"),
                 '2' => add_money(&conn, &global_username).expect("Getting money failed!"),
                 '3' => logout_user(&mut logged_in).expect("User logout failed!"),
                 '4' => get_data_from_db(&conn).expect("Data selecting failed!"),
+                '5' => buy(&conn).expect("Opening shop failed!"),
                 '0' => break,
                 _ => println!("wrong!")
             }
         } else if logged_in {
             logo();
             println!("\nProfile: {}", global_username);
-            print!("\n1 - my profile\n2 - get money\n3 - logout\n0 - exit\n\n>");
+            print!("\n1 - my profile\n2 - get money\n3 - logout\n4 - shop\n0 - exit\n\n>");
             let letter = get_user_input().chars().nth(0).unwrap();
             match letter {
                 '1' => get_profile(&conn, &global_username).expect("Getting profile failed!"),
                 '2' => add_money(&conn, &global_username).expect("Getting money failed!"),
                 '3' => logout_user(&mut logged_in).expect("User logout failed!"),
+                '4' => buy(&conn).expect("Opening shop failed!"),
                 '0' => break,
                 _ => println!("wrong!")
             }

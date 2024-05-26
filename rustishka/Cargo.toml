@@ -1,9 +1,7 @@
 [package]
-name = "untitled"
+name = "rustishka"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 actix-web = "4.5.1"
@@ -11,3 +9,4 @@ base64 = "0.22.0"
 rusqlite = { version = "0.31.0", features = ["bundled"] }
 sha2 = "0.11.0-pre.3"
 time = "0.3.34"
+iced = "0.12"
