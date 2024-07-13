@@ -273,12 +273,14 @@ fn buy(conn: &Connection) -> Result<()> {
         println!("Enter 0 if you wanna exit shop");
         print!("Enter ID of the item you wanna buy> ");
         let id = get_user_input().chars().nth(0).unwrap();
-        match id {
-            '0' => break,
-            _ => ()
+        if id as u64 <= 0 {
+            break
         }
         print!("Enter the amount of item you wanna buy> ");
         let amount = get_user_input().chars().nth(0).unwrap();
+        if amount as u64 <= 0 {
+            break
+        }
     }
 
     todo!();
@@ -310,7 +312,7 @@ fn shop(conn: &Connection) -> Result<()> {
 ┃{}   ┃{}                ┃{}      ┃\n┣━━━━╋━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━┫", item_unwr.id, item_unwr.product, item_unwr.price);
     }
     print!("
-┗━━━━┻━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━┛");
+┗━━━━┻━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━┛\n");
 
     Ok(())
 }
